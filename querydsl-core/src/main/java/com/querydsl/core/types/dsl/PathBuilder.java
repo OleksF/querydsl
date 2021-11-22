@@ -106,6 +106,7 @@ public class PathBuilder<T> extends EntityPathBase<T> {
     }
 
     @SuppressWarnings("unchecked")
+    // protected <A> Class<A> validate(String property, Class<A> propertyType) {
     protected <A> Class<? extends A> validate(String property, Class<A> propertyType) {
         Class<A> validatedType = (Class<A>) validator.validate(getType(), property, propertyType);
         if (validatedType != null) {
@@ -412,7 +413,7 @@ public class PathBuilder<T> extends EntityPathBase<T> {
     @SuppressWarnings("unchecked")
     public <A extends Number & Comparable<?>> NumberPath<A> getNumber(String property, Class<A> type) {
         Class<? extends A> vtype = validate(property, type);
-        return super.createNumber(property, (Class<? super A>) vtype);
+        return super.createNumber(property, (Class<A>) vtype);
     }
 
     /**

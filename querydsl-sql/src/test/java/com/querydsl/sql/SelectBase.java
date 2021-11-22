@@ -1991,8 +1991,15 @@ public class SelectBase extends AbstractBaseTest {
                 .select(employee.id, employee2.id).fetch().size());
     }
 
+    /**
+     * For the databse variants of Oracle, PostgreSQL, HSQLDB, CUBRID, Firebird, Teradata, and H2,
+     * checks the WITH RECURSIVE format for CTE execution, defining the CTE as the second argument
+     * to withRecursive().
+     * 
+     * @result withRecursive() can be used to recursively call a CTE without error.
+     */
     @Test
-    @IncludeIn({ORACLE, POSTGRESQL})
+    @IncludeIn({ORACLE, POSTGRESQL, CUBRID, FIREBIRD, TERADATA, H2})
     public void with_recursive() {
         assertEquals(10, query().withRecursive(employee2, query().from(employee)
                 .where(employee.firstname.eq("Jim"))
@@ -2001,11 +2008,36 @@ public class SelectBase extends AbstractBaseTest {
                .select(employee.id, employee2.id).fetch().size());
     }
 
-
+    /**
+     * For the databse variants of Oracle, PostgreSQL, HSQLDB, CUBRID, Firebird, Teradata, and H2,
+     * checks the WITH RECURSIVE format for CTE execution, first defining the data subset (using
+     * the full table) and then chaining to the CTE specified in as().
+     * 
+     * @result withRecursive() can be chained to queries with a smaller scope without error.
+     */
     @Test
-    @IncludeIn({ORACLE, POSTGRESQL})
+    @IncludeIn({ORACLE, POSTGRESQL, HSQLDB, CUBRID, FIREBIRD, TERADATA, H2})
     public void with_recursive2() {
         assertEquals(10, query().withRecursive(employee2, employee2.all()).as(
+                query().from(employee)
+                        .where(employee.firstname.eq("Jim"))
+                        .select(Wildcard.all))
+               .from(employee, employee2)
+               .select(employee.id, employee2.id).fetch().size());
+    }
+
+    /**
+     * For the databse variants of DB2, SQLServer, and MySQL, checks the WITH format in a test
+     * explicitly named to catch recursive CTE calls, keeping consistency to with_rescursive2()
+     * for variants using the RECURSIVE keyword.
+     * Note, MySQL supports the RECURSIVE keyword only in version 8+.
+     * 
+     * @result with() can be chained to queries with a smaller scope without error.
+     */
+    @Test
+    @IncludeIn({DB2, SQLSERVER, MYSQL})
+    public void with_recursive3() {
+        assertEquals(10, query().with(employee2, employee2.all()).as(
                 query().from(employee)
                         .where(employee.firstname.eq("Jim"))
                         .select(Wildcard.all))
