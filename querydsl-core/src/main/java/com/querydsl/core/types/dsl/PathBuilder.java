@@ -106,7 +106,6 @@ public class PathBuilder<T> extends EntityPathBase<T> {
     }
 
     @SuppressWarnings("unchecked")
-    // protected <A> Class<A> validate(String property, Class<A> propertyType) {
     protected <A> Class<? extends A> validate(String property, Class<A> propertyType) {
         Class<A> validatedType = (Class<A>) validator.validate(getType(), property, propertyType);
         if (validatedType != null) {
