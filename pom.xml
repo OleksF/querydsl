@@ -81,11 +81,6 @@
   </properties>
 
   <dependencies>
-    <!-- <dependency>
-      <groupId>oracle</groupId>
-      <artifactId>sdoapi</artifactId>
-      <version>11.2.0</version>
-    </dependency> -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -974,14 +969,6 @@
 
   <reporting>
     <plugins>
-      <!-- <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>junit-report-maven-plugin</artifactId>
-        <version>devel</version>
-        <configuration>
-          <testFailureIgnore>true</testFailureIgnore>
-        </configuration>
-      </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
