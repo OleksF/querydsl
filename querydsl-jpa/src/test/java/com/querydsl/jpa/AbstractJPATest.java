@@ -38,6 +38,7 @@ import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.group.QPair;
 import com.querydsl.core.group.MockTuple;
 import com.querydsl.core.testutil.ExcludeIn;
+import com.querydsl.core.testutil.IncludeIn;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.domain.*;
@@ -70,10 +71,13 @@ public abstract class AbstractJPATest {
             (Predicate) ExpressionUtils.extract(cond2));
 
     private static final Date birthDate;
+    private static final Date birthDate2;
 
     private static final java.sql.Date date;
+    private static final java.sql.Date date2;
 
     private static final java.sql.Time time;
+    private static final java.sql.Time time2;
 
     private final List<Cat> savedCats = new ArrayList<Cat>();
 
@@ -85,6 +89,14 @@ public abstract class AbstractJPATest {
         birthDate = cal.getTime();
         date = new java.sql.Date(cal.getTimeInMillis());
         time = new java.sql.Time(cal.getTimeInMillis());
+
+        Calendar cal2 = Calendar.getInstance();
+        cal2.set(2018, 1, 1, 3, 4);
+        cal2.set(Calendar.SECOND, 0);
+        cal2.set(Calendar.MILLISECOND, 0);
+        birthDate2 = cal.getTime();
+        date2 = new java.sql.Date(cal.getTimeInMillis());
+        time2 = new java.sql.Time(cal.getTimeInMillis());
     }
 
     protected Target getTarget() {
@@ -97,6 +109,9 @@ public abstract class AbstractJPATest {
 
     protected abstract void save(Object entity);
 
+    /**
+     * Sets up test suite objects.
+     */
     @Before
     public void setUp() {
         if (query().from(cat).fetchCount() > 0) {
@@ -132,6 +147,11 @@ public abstract class AbstractJPATest {
         cat.setBirthdate(birthDate);
         save(cat);
         savedCats.add(cat);
+
+        Cat cat2 = new Cat("SomeOther", 7, 7.0);
+        cat2.setBirthdate(birthDate2);
+        save(cat2);
+        savedCats.add(cat2);
 
         Show show = new Show(1);
         show.acts = new HashMap<String,String>();
@@ -675,12 +695,33 @@ public abstract class AbstractJPATest {
         assertEquals(0, query().from(cat).select(cat.birthdate.second()).fetchFirst().intValue());
     }
 
+    /**
+     * Checks that yearWeek() behavior produces expected ISO standard result.
+     * 
+     * @result yearweek returns an ISO standard result
+     */
     @Test
+    @ExcludeIn(MYSQL)
     @NoEclipseLink({DERBY, HSQLDB})
     @NoHibernate({DERBY, POSTGRESQL, SQLSERVER})
     public void date_yearWeek() {
         int value = query().from(cat).select(cat.birthdate.yearWeek()).fetchFirst();
-        assertTrue(value == 200006 || value == 200005);
+        assertTrue(value == 200006 || value == 200005 || value == 201801);
+    }
+
+    /**
+     * For MySQL, checks default yearWeek() behavior is consistent with mode 0
+     * which is the default, and not ISO.
+     * Applies to derivative DB's such as MariaDB.
+     * 
+     * @result The mode 0 MySQl standard is followed by default, e.g. 
+     * `SELECT YEARWEEK("2018-01-01")` returns '201753'.
+     */
+    @Test
+    @IncludeIn(MYSQL)
+    public void date_yearWeek_mysql() {
+        int value = query().from(cat).select(cat.birthdate.yearWeek_mysql()).where(cat.name.eq("SomeOther")).fetchFirst();
+        assertTrue(value == 201753);
     }
 
     @Test
@@ -688,7 +729,7 @@ public abstract class AbstractJPATest {
     @NoHibernate({DERBY, POSTGRESQL, SQLSERVER})
     public void date_week() {
         int value = query().from(cat).select(cat.birthdate.week()).fetchFirst();
-        assertTrue(value == 6 || value == 5);
+        assertTrue(value == 6 || value == 5 || value == 0);
     }
 
     @Test
@@ -1284,15 +1325,20 @@ public abstract class AbstractJPATest {
     @NoOpenJPA
     @NoBatooJPA // FIXME
     public void offset1() {
-        List<String> names2 = Arrays.asList("Bob123", "Felix123", "Mary_123", "Ruth123", "Some");
+        List<String> names2 = Arrays.asList("Bob123", "Felix123", "Mary_123", "Ruth123", "Some", "SomeOther");
         assertEquals(names2, query().from(cat).orderBy(cat.name.asc()).offset(1).select(cat.name).fetch());
     }
 
+    /**
+     * Validates that offset() function correctly truncates result.
+     * 
+     * @result offset() function correctly drops first two records
+     */
     @Test
     @NoOpenJPA
     @NoBatooJPA // FIXME
     public void offset2() {
-        List<String> names2 = Arrays.asList("Felix123", "Mary_123", "Ruth123", "Some");
+        List<String> names2 = Arrays.asList("Felix123", "Mary_123", "Ruth123", "Some", "SomeOther");
         assertEquals(names2, query().from(cat).orderBy(cat.name.asc()).offset(2).select(cat.name).fetch());
     }
 

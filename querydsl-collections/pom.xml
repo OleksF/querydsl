@@ -16,6 +16,14 @@
   <url>${project.homepage}</url>
   <packaging>jar</packaging>
 
+  <properties>
+    <osgi.import.package>
+      org.joda.time.*;version="[1.6,3)",
+      ${osgi.import.package.root}
+    </osgi.import.package>
+    <argLine>-Xms256m -Xmx512m -Duser.timezone=UTC</argLine>
+  </properties>
+
   <scm>
     <connection>${project.checkout}</connection>
     <developerConnection>${project.checkout}</developerConnection>
@@ -95,7 +103,7 @@
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>${jodatime.version}</version>
-      <scope>test</scope>
+      <scope>provided</scope>
     </dependency>    
 
   </dependencies>

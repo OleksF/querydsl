@@ -87,7 +87,7 @@ public abstract class DateTimeExpression<T extends Comparable> extends TemporalE
     private transient volatile DateTimeExpression<T> min, max;
 
     @Nullable
-    private transient volatile NumberExpression<Integer> week, month, year, yearMonth, yearWeek;
+    private transient volatile NumberExpression<Integer> week, month, year, yearMonth, yearWeek, yearWeek_mysql;
 
     public DateTimeExpression(Expression<T> mixin) {
         super(mixin);
@@ -274,6 +274,18 @@ public abstract class DateTimeExpression<T extends Comparable> extends TemporalE
             yearWeek = Expressions.numberOperation(Integer.class, Ops.DateTimeOps.YEAR_WEEK, mixin);
         }
         return yearWeek;
+    }
+
+    /**
+     * Create a MySQL mode 0 yearweek expression
+     *
+     * @return year week
+     */
+    public NumberExpression<Integer> yearWeek_mysql() {
+        if (yearWeek_mysql == null) {
+            yearWeek_mysql = Expressions.numberOperation(Integer.class, Ops.DateTimeOps.YEAR_WEEK_MYSQL, mixin);
+        }
+        return yearWeek_mysql;
     }
 
     /**

@@ -233,6 +233,7 @@ public enum Ops implements Operator {
         WEEK(Integer.class),
         YEAR_MONTH(Integer.class),
         YEAR_WEEK(Integer.class),
+        YEAR_WEEK_MYSQL(Integer.class),
         DAY_OF_WEEK(Integer.class),
         DAY_OF_MONTH(Integer.class),
         DAY_OF_YEAR(Integer.class);
